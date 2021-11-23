@@ -6,11 +6,12 @@
 class Camera
 {
 public:
-	Camera();
+	Camera(const unsigned int width, const unsigned int height);
 
 	void processInput(GLFWwindow* window, float deltaTime);
 	void processMouse(double x, double y);
 	glm::mat4 getViewMatrix();
+	glm::mat4 getProjectionMatrix();
 	glm::vec3 getPosition() { return position; }
 private:
 	glm::vec3 position;
@@ -24,4 +25,7 @@ private:
 
 	double previousMouseX = 0;
 	double previousMouseY = 0;
+
+	float fieldOfView = 70.0f;
+	glm::mat4 projectionMatrix;
 };

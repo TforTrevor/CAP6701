@@ -48,6 +48,12 @@
     <ClCompile Include="post_processing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="sky.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="miniz.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="render_object.hpp">
@@ -81,6 +87,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="hdr_fbo.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sky.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="miniz.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -125,6 +137,18 @@
       <Filter>Source Files\shaders</Filter>
     </None>
     <None Include="shaders\linear_to_gamma.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\skybox.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\skybox.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\equi_to_cube.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\equi_to_cube.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>

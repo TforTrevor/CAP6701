@@ -9,6 +9,7 @@ class Material
 {
 public:
 	Material(std::shared_ptr<Texture> albedo, std::shared_ptr<Shader> shader);
+	Material(GLuint textureID, std::shared_ptr<Shader> shader);
 
 	void bind();
 	void unbind();

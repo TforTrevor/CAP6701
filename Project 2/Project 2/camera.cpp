@@ -1,18 +1,26 @@
 #include "camera.hpp"
 
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
-Camera::Camera()
+Camera::Camera(const unsigned int width, const unsigned int height)
 {
 	position = glm::vec3(0, 0, -1);
 	forward = glm::vec3(0, 0, 1);
 	up = glm::vec3(0, 1, 0);
 	right = glm::vec3(1, 0, 0);
+
+	projectionMatrix = glm::perspective(glm::radians(fieldOfView), (float)width / (float)height, 0.3f, 1000.0f);
 }
 
 glm::mat4 Camera::getViewMatrix()
 {
 	return glm::lookAt(position, position + forward, up);
+}
+
+glm::mat4 Camera::getProjectionMatrix()
+{
+	return projectionMatrix;
 }
 
 void Camera::processInput(GLFWwindow* window, float deltaTime)

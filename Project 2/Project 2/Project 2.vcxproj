@@ -173,18 +173,21 @@
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="material.cpp" />
+    <ClCompile Include="miniz.c" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="particle_system.cpp" />
     <ClCompile Include="post_processing.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="render_object.cpp" />
     <ClCompile Include="shader.cpp" />
+    <ClCompile Include="sky.cpp" />
     <ClCompile Include="texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.hpp" />
     <ClInclude Include="hdr_fbo.hpp" />
     <ClInclude Include="material.hpp" />
+    <ClInclude Include="miniz.h" />
     <ClInclude Include="model.hpp" />
     <ClInclude Include="particle_system.hpp" />
     <ClInclude Include="post_processing.hpp" />
@@ -192,6 +195,7 @@
     <ClInclude Include="render_object.hpp" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="assets.hpp" />
+    <ClInclude Include="sky.hpp" />
     <ClInclude Include="texture.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -199,6 +203,8 @@
     <None Include="shaders\copy.frag" />
     <None Include="shaders\default.vert" />
     <None Include="shaders\default_tess.vert" />
+    <None Include="shaders\equi_to_cube.frag" />
+    <None Include="shaders\equi_to_cube.vert" />
     <None Include="shaders\hdr.frag" />
     <None Include="shaders\linear_to_gamma.frag" />
     <None Include="shaders\pbr.frag" />
@@ -206,6 +212,8 @@
     <None Include="shaders\post_processing.vert" />
     <None Include="shaders\quad_tess.tesc" />
     <None Include="shaders\quad_tess.tese" />
+    <None Include="shaders\skybox.frag" />
+    <None Include="shaders\skybox.vert" />
     <None Include="shaders\tri_tess.tesc" />
     <None Include="shaders\tri_tess.tese" />
     <None Include="shaders\waves.vert" />

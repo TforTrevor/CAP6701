@@ -4,7 +4,7 @@
 
 Renderer::Renderer(std::shared_ptr<Camera> camera) : camera{ camera }
 {
-	projectionMatrix = glm::perspective(glm::radians(70.0f), 1280.0f / 720.0f, 0.3f, 1000.0f);
+	
 }
 
 void Renderer::begin(GLuint frameBuffer)
@@ -27,10 +27,10 @@ void Renderer::drawObjects(std::vector<RenderObject>& objects, float time)
 			std::shared_ptr<Shader> shader = object.getMaterial()->getShader();
 			object.getMaterial()->bind();
 
-			glm::mat4 MVP = projectionMatrix * camera->getViewMatrix() * object.getModelMatrix();
+			glm::mat4 MVP = camera->getProjectionMatrix() * camera->getViewMatrix() * object.getModelMatrix();
 			shader->setUniformMat4("MVP", MVP);
 			shader->setUniformMat4("modelMatrix", object.getModelMatrix());
-			glm::mat4 VP = projectionMatrix * camera->getViewMatrix();
+			glm::mat4 VP = camera->getProjectionMatrix() * camera->getViewMatrix();
 			shader->setUniformMat4("vpMatrix", VP);
 
 			shader->setUniform3f("lightDir", glm::vec3(-3.0f, -4.0f, -4.0f));

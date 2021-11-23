@@ -23,7 +23,6 @@ public:
 private:
 	std::shared_ptr<Camera> camera;
 
-	glm::mat4 projectionMatrix;
 	bool enableTessellation = false;
 	int patchSize = 3;
 };

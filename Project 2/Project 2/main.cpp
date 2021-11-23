@@ -7,6 +7,7 @@
 #include "assets.hpp"
 #include "post_processing.hpp"
 #include "hdr_fbo.hpp"
+#include "sky.hpp"
 
 double mouseX = 0;
 double mouseY = 0;
@@ -82,7 +83,7 @@ int main()
     std::shared_ptr<MaterialAssets> materialAssets = std::make_shared<MaterialAssets>(shaderAssets, textureAssets);
     std::shared_ptr<ModelAssets> modelAssets = std::make_shared<ModelAssets>();
 
-    std::shared_ptr<Camera> camera = std::make_shared<Camera>();
+    std::shared_ptr<Camera> camera = std::make_shared<Camera>(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     RenderObject pbrBoat = { modelAssets->hull, materialAssets->pbrBoat };
     RenderObject phongBoat = { modelAssets->hull, materialAssets->phongBoat };
@@ -116,6 +117,8 @@ int main()
     std::vector<RenderObject> pbrQuadObjects = { pbrBoatQuad, pbrSailQuad, pbrBallQuad, pbrWavesQuad };
     std::vector<RenderObject> phongQuadObjects = { phongBoatQuad, phongSailQuad, phongBallQuad, phongWavesQuad };
     std::vector<ParticleSystem> particleSystems = loadParticles(modelAssets, materialAssets);
+
+    Sky sky;
     
     glEnable(GL_DEPTH_TEST);
     //glEnable(GL_FRAMEBUFFER_SRGB);
@@ -130,6 +133,8 @@ int main()
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
+        glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
         if (wireframeToggle)
         {
@@ -193,9 +198,11 @@ int main()
         renderer.drawObjects(phongQuadObjects, currentFrame);
         renderer.toggleTessellation(false);
         renderer.drawObjects(particleSystems, currentFrame);
-        renderer.end();
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+        sky.draw(camera);
+        renderer.end();
 
         postProcessing.begin(hdrFBO);
         postProcessing.render(shaderAssets->ppHDR);
