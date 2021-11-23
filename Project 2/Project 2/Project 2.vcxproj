@@ -204,7 +204,7 @@
     <None Include="shaders\default.vert" />
     <None Include="shaders\default_tess.vert" />
     <None Include="shaders\equi_to_cube.frag" />
-    <None Include="shaders\equi_to_cube.vert" />
+    <None Include="shaders\cubemap.vert" />
     <None Include="shaders\hdr.frag" />
     <None Include="shaders\linear_to_gamma.frag" />
     <None Include="shaders\pbr.frag" />
@@ -214,6 +214,7 @@
     <None Include="shaders\quad_tess.tese" />
     <None Include="shaders\skybox.frag" />
     <None Include="shaders\skybox.vert" />
+    <None Include="shaders\irradiance_convolution.frag" />
     <None Include="shaders\tri_tess.tesc" />
     <None Include="shaders\tri_tess.tese" />
     <None Include="shaders\waves.vert" />

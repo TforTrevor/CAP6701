@@ -109,7 +109,9 @@ int main()
     RenderObject pbrWavesQuad = { modelAssets->waterQuads, materialAssets->pbrWavesQuad };
     RenderObject phongWavesQuad = { modelAssets->waterQuads, materialAssets->phongWavesQuad };
 
-    Renderer renderer{ camera };
+    std::shared_ptr<Sky> sky = std::make_shared<Sky>();
+
+    Renderer renderer{ camera, sky };
     PostProcessing postProcessing { WINDOW_WIDTH, WINDOW_HEIGHT };
 
     std::vector<RenderObject> pbrObjects = { pbrBoat, pbrSail, pbrBall, pbrWaves };
@@ -117,8 +119,6 @@ int main()
     std::vector<RenderObject> pbrQuadObjects = { pbrBoatQuad, pbrSailQuad, pbrBallQuad, pbrWavesQuad };
     std::vector<RenderObject> phongQuadObjects = { phongBoatQuad, phongSailQuad, phongBallQuad, phongWavesQuad };
     std::vector<ParticleSystem> particleSystems = loadParticles(modelAssets, materialAssets);
-
-    Sky sky;
     
     glEnable(GL_DEPTH_TEST);
     //glEnable(GL_FRAMEBUFFER_SRGB);
@@ -201,7 +201,7 @@ int main()
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        sky.draw(camera);
+        sky->draw(camera);
         renderer.end();
 
         postProcessing.begin(hdrFBO);

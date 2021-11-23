@@ -148,7 +148,10 @@
     <None Include="shaders\equi_to_cube.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\equi_to_cube.vert">
+    <None Include="shaders\cubemap.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\irradiance_convolution.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>

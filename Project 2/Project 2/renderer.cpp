@@ -2,7 +2,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-Renderer::Renderer(std::shared_ptr<Camera> camera) : camera{ camera }
+Renderer::Renderer(std::shared_ptr<Camera> camera, std::shared_ptr<Sky> sky) : camera{ camera }, sky{ sky }
 {
 	
 }
@@ -34,11 +34,15 @@ void Renderer::drawObjects(std::vector<RenderObject>& objects, float time)
 			shader->setUniformMat4("vpMatrix", VP);
 
 			shader->setUniform3f("lightDir", glm::vec3(-3.0f, -4.0f, -4.0f));
-			shader->setUniform4f("lightColor", glm::vec4(1.0f, 1.0f, 1.0f, 5.0f));
+			shader->setUniform4f("lightColor", glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
 
 			shader->setUniform3f("viewPos", camera->getPosition());
 
 			shader->setUniform1f("time", time);
+
+			//glActiveTexture(GL_TEXTURE0 + object.getMaterial()->getTextureCount());
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, sky->getIrradiance());
 
 			if (enableTessellation)
 			{

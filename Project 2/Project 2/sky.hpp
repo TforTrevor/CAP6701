@@ -9,9 +9,11 @@ public:
 	Sky();
 
 	void draw(std::shared_ptr<Camera> camera);
+	GLuint getIrradiance() { return irradianceMap; }
 
 private:
 	std::unique_ptr<RenderObject> skyboxObject;
+	GLuint irradianceMap;
 
-	void captureCubemap();
+	GLuint captureCubemap(std::shared_ptr<Material> material, const unsigned int width, const unsigned int height);
 };

@@ -16,12 +16,14 @@ uniform float metallic = 0.0;
 uniform float roughness = 0.35;
 uniform float ao = 1.0;
 
+uniform samplerCube irradianceMap;
+
 #define PI 3.1415926538
 
 float distributionGGX(vec3 N, vec3 H, float roughness);
 float geometrySchlickGGX(float NdotV, float roughness);
 float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
-vec3 fresnelSchlick(float cosTheta, vec3 F0);
+vec3 fresnelSchlick(float cosTheta, vec3 f0, float roughness);
 vec3 acesTonemap(vec3 x);
 
 void main()
@@ -43,7 +45,7 @@ void main()
 
 	float NDF = distributionGGX(N, H, roughness);
 	float G = geometrySmith(N, V, L, roughness);
-	vec3 F = fresnelSchlick(max(dot(H, V), 0.0), f0);
+	vec3 F = fresnelSchlick(max(dot(H, V), 0.0), f0, roughness);
 
 	vec3 ks = F;
 	vec3 kd = vec3(1.0) - ks;
@@ -56,7 +58,13 @@ void main()
 	float nDotL = max(dot(N, L), 0.0);
 	lo += (kd * albedo / PI + specular) * radiance * nDotL;
 
-	vec3 ambient = vec3(0.03) * albedo * ao;
+	vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), f0, roughness);
+    vec3 kD = 1.0 - kS;
+    kD *= 1.0 - metallic;	  
+    vec3 irradiance = texture(irradianceMap, vec3(N.x, -N.y, N.z)).rgb;
+    vec3 diffuse = irradiance * albedo;
+    vec3 ambient = (kD * diffuse) * ao;
+	//vec3 ambient = vec3(0.03) * albedo * ao;
 	vec3 color = ambient + lo;
 
 	//color = acesTonemap(color);
@@ -66,9 +74,9 @@ void main()
 	fragColor = vec4(color, 1.0);
 }
 
-vec3 fresnelSchlick(float cosTheta, vec3 f0)
+vec3 fresnelSchlick(float cosTheta, vec3 f0, float roughness)
 {
-	return f0 + (1.0 - f0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+	return f0 + (max(vec3(1.0 - roughness), f0) - f0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
 float distributionGGX(vec3 N, vec3 H, float roughness)
