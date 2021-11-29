@@ -46,7 +46,7 @@ void Renderer::drawObjects(std::vector<RenderObject>& objects, float time)
 
 			if (enableTessellation)
 			{
-				shader->setUniform1i("tessLevel", 16);
+				shader->setUniform1i("tessLevel", 1);
 				glPatchParameteri(GL_PATCH_VERTICES, patchSize);
 				object.draw(GL_PATCHES);
 			}

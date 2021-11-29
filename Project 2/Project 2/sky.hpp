@@ -6,7 +6,7 @@
 class Sky
 {
 public:
-	Sky();
+	Sky(std::string hdriPath);
 
 	void draw(std::shared_ptr<Camera> camera);
 	GLuint getIrradiance() { return irradianceMap; }

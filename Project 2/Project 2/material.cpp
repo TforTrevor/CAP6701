@@ -13,6 +13,8 @@ Material::Material(std::shared_ptr<Texture> albedo, std::shared_ptr<Shader> shad
 void Material::bind()
 {
 	shader->bind();
+	shader->setUniform1f("roughness", roughness);
+	shader->setUniform1f("metallic", metallic);
 	glActiveTexture(GL_TEXTURE0);
 	if (albedoTexture->isCubemap())
 	{

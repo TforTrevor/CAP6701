@@ -17,16 +17,11 @@ public:
 	unsigned int getTextureCount() { return textureCount; }
 
 	float metallic = 0.0f;
-	float roughness = 0.5f;
+	float roughness = 0.35f;
 private:
 	std::shared_ptr<Shader> shader;
 
 	std::shared_ptr<Texture> albedoTexture;
-
-	//GLuint normalTexture;
-	//GLuint maskTexture; //r: metal, g: ao, b: null, a: roughness
-	GLuint metallicID;
-	GLuint roughnessID;
 
 	unsigned int textureCount = 1;
 };
