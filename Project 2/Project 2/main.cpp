@@ -119,6 +119,7 @@ int main()
 
     //std::shared_ptr<Sky> sky = std::make_shared<Sky>("textures/spruit_sunrise_2k.exr");
     std::shared_ptr<Sky> sky = std::make_shared<Sky>("textures/shudu_lake_2k.exr");
+    //std::shared_ptr<Sky> sky = std::make_shared<Sky>("textures/lakeside_2k.exr");
 
     Renderer renderer{ camera, sky };
     PostProcessing postProcessing { WINDOW_WIDTH, WINDOW_HEIGHT };
