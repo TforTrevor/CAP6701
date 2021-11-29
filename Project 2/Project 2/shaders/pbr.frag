@@ -13,7 +13,7 @@ uniform vec3 viewPos;
 
 uniform sampler2D albedoTex;
 uniform float metallic = 0.0;
-uniform float roughness = 0.35;
+uniform float roughness = 0.5;
 uniform float ao = 1.0;
 
 uniform samplerCube irradianceMap;

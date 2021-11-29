@@ -41,6 +41,11 @@ void keyCallback(GLFWwindow* window, int key, int scanCode, int action, int mods
     }
 }
 
+void errorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+{
+    std::cout << message << std::endl;
+}
+
 std::vector<ParticleSystem> loadParticles(std::shared_ptr<ModelAssets>& models, std::shared_ptr<MaterialAssets>& materials)
 {
     std::vector<ParticleSystem> objects;
@@ -75,8 +80,11 @@ int main()
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouseCallback);
     glfwSetKeyCallback(window, keyCallback);
+    glfwSwapInterval(1);
 
     std::cout << glGetString(GL_VERSION) << std::endl;
+
+    glDebugMessageCallback(errorCallback, nullptr);
 
     std::shared_ptr<ShaderAssets> shaderAssets = std::make_shared<ShaderAssets>();
     std::shared_ptr<TextureAssets> textureAssets = std::make_shared<TextureAssets>();
@@ -109,7 +117,9 @@ int main()
     RenderObject pbrWavesQuad = { modelAssets->waterQuads, materialAssets->pbrWavesQuad };
     RenderObject phongWavesQuad = { modelAssets->waterQuads, materialAssets->phongWavesQuad };
 
-    std::shared_ptr<Sky> sky = std::make_shared<Sky>();
+    //std::shared_ptr<Sky> sky = std::make_shared<Sky>("textures/spruit_sunrise_2k.exr");
+    std::shared_ptr<Sky> sky = std::make_shared<Sky>("textures/shudu_lake_2k.exr");
+    //std::shared_ptr<Sky> sky = std::make_shared<Sky>("textures/lakeside_2k.exr");
 
     Renderer renderer{ camera, sky };
     PostProcessing postProcessing { WINDOW_WIDTH, WINDOW_HEIGHT };
@@ -120,6 +130,7 @@ int main()
     std::vector<RenderObject> phongQuadObjects = { phongBoatQuad, phongSailQuad, phongBallQuad, phongWavesQuad };
     std::vector<ParticleSystem> particleSystems = loadParticles(modelAssets, materialAssets);
     
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     glEnable(GL_DEPTH_TEST);
     //glEnable(GL_FRAMEBUFFER_SRGB);
 

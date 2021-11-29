@@ -34,19 +34,19 @@ void Renderer::drawObjects(std::vector<RenderObject>& objects, float time)
 			shader->setUniformMat4("vpMatrix", VP);
 
 			shader->setUniform3f("lightDir", glm::vec3(-3.0f, -4.0f, -4.0f));
-			shader->setUniform4f("lightColor", glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
+			shader->setUniform4f("lightColor", glm::vec4(1.0f, 1.0f, 1.0f, 5.0f));
 
 			shader->setUniform3f("viewPos", camera->getPosition());
 
 			shader->setUniform1f("time", time);
 
-			//glActiveTexture(GL_TEXTURE0 + object.getMaterial()->getTextureCount());
-			glActiveTexture(GL_TEXTURE0);
+			glActiveTexture(GL_TEXTURE0 + object.getMaterial()->getTextureCount());
+			shader->setUniform1i("irradianceMap", object.getMaterial()->getTextureCount());
 			glBindTexture(GL_TEXTURE_CUBE_MAP, sky->getIrradiance());
 
 			if (enableTessellation)
 			{
-				shader->setUniform1i("tessLevel", 16);
+				shader->setUniform1i("tessLevel", 1);
 				glPatchParameteri(GL_PATCH_VERTICES, patchSize);
 				object.draw(GL_PATCHES);
 			}

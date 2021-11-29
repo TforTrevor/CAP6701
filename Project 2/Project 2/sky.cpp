@@ -1,9 +1,9 @@
 #include "sky.hpp"
 
-Sky::Sky()
+Sky::Sky(std::string hdriPath)
 {
 	std::shared_ptr<Shader> equiShader = std::make_shared<Shader>("shaders/cubemap.vert", "shaders/equi_to_cube.frag");
-	std::shared_ptr<Texture> equiTexture = std::make_shared<Texture>("textures/shudu_lake_2k.exr");
+	std::shared_ptr<Texture> equiTexture = std::make_shared<Texture>(hdriPath);
 	std::shared_ptr<Material> equiMaterial = std::make_shared<Material>(equiTexture, equiShader);
 	GLuint skyboxCubemap = captureCubemap(equiMaterial, 512, 512);
 
