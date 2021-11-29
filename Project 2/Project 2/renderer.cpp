@@ -40,8 +40,8 @@ void Renderer::drawObjects(std::vector<RenderObject>& objects, float time)
 
 			shader->setUniform1f("time", time);
 
-			//glActiveTexture(GL_TEXTURE0 + object.getMaterial()->getTextureCount());
-			glActiveTexture(GL_TEXTURE0);
+			glActiveTexture(GL_TEXTURE0 + object.getMaterial()->getTextureCount());
+			shader->setUniform1i("irradianceMap", object.getMaterial()->getTextureCount());
 			glBindTexture(GL_TEXTURE_CUBE_MAP, sky->getIrradiance());
 
 			if (enableTessellation)
