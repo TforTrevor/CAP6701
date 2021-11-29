@@ -8,6 +8,7 @@
 #include "post_processing.hpp"
 #include "hdr_fbo.hpp"
 #include "sky.hpp"
+#include "trefoil.hpp"
 
 double mouseX = 0;
 double mouseY = 0;
@@ -117,6 +118,8 @@ int main()
     RenderObject pbrWavesQuad = { modelAssets->waterQuads, materialAssets->pbrWavesQuad };
     RenderObject phongWavesQuad = { modelAssets->waterQuads, materialAssets->phongWavesQuad };
 
+    Trefoil trefoilKnot;
+
     //std::shared_ptr<Sky> sky = std::make_shared<Sky>("textures/spruit_sunrise_2k.exr");
     std::shared_ptr<Sky> sky = std::make_shared<Sky>("textures/shudu_lake_2k.exr");
     //std::shared_ptr<Sky> sky = std::make_shared<Sky>("textures/lakeside_2k.exr");
@@ -200,17 +203,18 @@ int main()
         }
         
         renderer.begin(hdrFBO.frameBufferObject);
-        renderer.toggleTessellation(true);
-        renderer.setPatchSize(3);
-        renderer.drawObjects(pbrObjects, currentFrame);
-        renderer.drawObjects(phongObjects, currentFrame);
-        renderer.setPatchSize(4);
-        renderer.drawObjects(pbrQuadObjects, currentFrame);
-        renderer.drawObjects(phongQuadObjects, currentFrame);
-        renderer.toggleTessellation(false);
-        renderer.drawObjects(particleSystems, currentFrame);
+        //renderer.toggleTessellation(true);
+        //renderer.setPatchSize(3);
+        //renderer.drawObjects(pbrObjects, currentFrame);
+        //renderer.drawObjects(phongObjects, currentFrame);
+        //renderer.setPatchSize(4);
+        //renderer.drawObjects(pbrQuadObjects, currentFrame);
+        //renderer.drawObjects(phongQuadObjects, currentFrame);
+        //renderer.toggleTessellation(false);
+        //renderer.drawObjects(particleSystems, currentFrame);
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        trefoilKnot.draw(camera, wireframeToggle);
 
         sky->draw(camera);
         renderer.end();

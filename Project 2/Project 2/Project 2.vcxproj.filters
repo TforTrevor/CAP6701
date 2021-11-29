@@ -54,6 +54,9 @@
     <ClCompile Include="miniz.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="trefoil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="render_object.hpp">
@@ -93,6 +96,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="miniz.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="trefoil.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -152,6 +158,12 @@
       <Filter>Source Files\shaders</Filter>
     </None>
     <None Include="shaders\irradiance_convolution.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\trefoil.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\trefoil.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>

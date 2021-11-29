@@ -182,6 +182,7 @@
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="sky.cpp" />
     <ClCompile Include="texture.cpp" />
+    <ClCompile Include="trefoil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.hpp" />
@@ -197,6 +198,7 @@
     <ClInclude Include="assets.hpp" />
     <ClInclude Include="sky.hpp" />
     <ClInclude Include="texture.hpp" />
+    <ClInclude Include="trefoil.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\aces.frag" />
@@ -215,6 +217,8 @@
     <None Include="shaders\skybox.frag" />
     <None Include="shaders\skybox.vert" />
     <None Include="shaders\irradiance_convolution.frag" />
+    <None Include="shaders\trefoil.frag" />
+    <None Include="shaders\trefoil.vert" />
     <None Include="shaders\tri_tess.tesc" />
     <None Include="shaders\tri_tess.tese" />
     <None Include="shaders\waves.vert" />
