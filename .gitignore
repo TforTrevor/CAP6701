@@ -430,3 +430,5 @@ FodyWeavers.xsd
 # End of https://www.toptal.com/developers/gitignore/api/c++,visualstudio
 
 External/
+
+!Project 2/Project 2/models/*.obj
