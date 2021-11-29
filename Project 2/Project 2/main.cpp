@@ -41,6 +41,11 @@ void keyCallback(GLFWwindow* window, int key, int scanCode, int action, int mods
     }
 }
 
+void errorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+{
+    std::cout << message << std::endl;
+}
+
 std::vector<ParticleSystem> loadParticles(std::shared_ptr<ModelAssets>& models, std::shared_ptr<MaterialAssets>& materials)
 {
     std::vector<ParticleSystem> objects;
@@ -78,6 +83,8 @@ int main()
     glfwSwapInterval(1);
 
     std::cout << glGetString(GL_VERSION) << std::endl;
+
+    glDebugMessageCallback(errorCallback, nullptr);
 
     std::shared_ptr<ShaderAssets> shaderAssets = std::make_shared<ShaderAssets>();
     std::shared_ptr<TextureAssets> textureAssets = std::make_shared<TextureAssets>();
