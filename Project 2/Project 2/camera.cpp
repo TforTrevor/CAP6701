@@ -25,7 +25,16 @@ glm::mat4 Camera::getProjectionMatrix()
 
 void Camera::processInput(GLFWwindow* window, float deltaTime)
 {
-	const float speed = 5.0f * deltaTime;
+	float speed = 5.0f * deltaTime;
+
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+	{
+		speed = 5.0f * 5.0f * deltaTime;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
+	{
+		speed = 5.0f * deltaTime;
+	}	
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
