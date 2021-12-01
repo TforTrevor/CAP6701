@@ -17,7 +17,7 @@ public:
 	unsigned int getTextureCount() { return textureCount; }
 
 	float metallic = 0.0f;
-	float roughness = 0.35f;
+	float roughness = 0.5f;
 private:
 	std::shared_ptr<Shader> shader;
 

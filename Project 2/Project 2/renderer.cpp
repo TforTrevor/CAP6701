@@ -40,13 +40,20 @@ void Renderer::drawObjects(std::vector<RenderObject>& objects, float time)
 
 			shader->setUniform1f("time", time);
 
-			glActiveTexture(GL_TEXTURE0 + object.getMaterial()->getTextureCount());
-			shader->setUniform1i("irradianceMap", object.getMaterial()->getTextureCount());
+			const int textureCount = object.getMaterial()->getTextureCount();
+			glActiveTexture(GL_TEXTURE0 + textureCount);
+			shader->setUniform1i("irradianceMap", textureCount);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, sky->getIrradiance());
+			glActiveTexture(GL_TEXTURE0 + textureCount + 1);
+			shader->setUniform1i("prefilterMap", textureCount + 1);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, sky->getPrefilter());
+			glActiveTexture(GL_TEXTURE0 + textureCount + 2);
+			shader->setUniform1i("brdfLUT", textureCount + 2);
+			glBindTexture(GL_TEXTURE_2D, sky->getBRDF());
 
 			if (enableTessellation)
 			{
-				shader->setUniform1i("tessLevel", 1);
+				shader->setUniform1i("tessLevel", 16);
 				glPatchParameteri(GL_PATCH_VERTICES, patchSize);
 				object.draw(GL_PATCHES);
 			}

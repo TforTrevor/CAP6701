@@ -37,8 +37,8 @@ void PostProcessing::render(std::shared_ptr<Shader> effect)
 
     glBindVertexArray(quadVAO);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    
     glBindVertexArray(0);
+
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

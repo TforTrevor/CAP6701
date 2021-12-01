@@ -154,5 +154,11 @@
     <None Include="shaders\irradiance_convolution.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
+    <None Include="shaders\prefilter.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\brdf.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

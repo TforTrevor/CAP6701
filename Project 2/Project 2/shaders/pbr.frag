@@ -17,6 +17,8 @@ uniform float roughness = 0.5;
 uniform float ao = 1.0;
 
 uniform samplerCube irradianceMap;
+uniform samplerCube prefilterMap;
+uniform sampler2D brdfLUT;
 
 #define PI 3.1415926538
 
@@ -30,6 +32,7 @@ void main()
 {
 	vec3 N = normalize(teNormal);
 	vec3 V = normalize(viewPos - tePos);
+	vec3 R = reflect(-V, N);
 
 	//vec3 albedo = pow(texture(albedoTex, vec2(teUV.x, -teUV.y)).rgb, vec3(2.2, 2.2, 2.2));
 	vec3 albedo = texture(albedoTex, vec2(teUV.x, -teUV.y)).rgb;
@@ -38,38 +41,44 @@ void main()
 	f0 = mix(f0, albedo, metallic);
 
 	vec3 lo = vec3(0.0);
+	{
+		vec3 L = normalize(-lightDir);
+		vec3 H = normalize(V + L);
+		vec3 radiance = L * lightColor.rgb * lightColor.a;
 
-	vec3 L = normalize(-lightDir);
-	vec3 H = normalize(V + L);
-	vec3 radiance = L * lightColor.rgb * lightColor.a;
+		float NDF = distributionGGX(N, H, roughness);
+		float G = geometrySmith(N, V, L, roughness);
+		vec3 F = fresnelSchlick(max(dot(H, V), 0.0), f0, roughness);
 
-	float NDF = distributionGGX(N, H, roughness);
-	float G = geometrySmith(N, V, L, roughness);
-	vec3 F = fresnelSchlick(max(dot(H, V), 0.0), f0, roughness);
+		vec3 ks = F;
+		vec3 kd = vec3(1.0) - ks;
+		kd *= 1.0 - metallic;
 
-	vec3 ks = F;
-	vec3 kd = vec3(1.0) - ks;
-	kd *= 1.0 - metallic;
+		vec3 numerator = NDF * G * F;
+		float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+		vec3 specular = numerator / denominator;
 
-	vec3 numerator = NDF * G * F;
-	float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
-	vec3 specular = numerator / denominator;
+		float nDotL = max(dot(N, L), 0.0);
+		lo += (kd * albedo / PI + specular) * radiance * nDotL;
+	}
 
-	float nDotL = max(dot(N, L), 0.0);
-	lo += (kd * albedo / PI + specular) * radiance * nDotL;
+	vec3 F = fresnelSchlick(max(dot(N, V), 0.0), f0, roughness);
 
-	vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), f0, roughness);
+	vec3 kS = F;
     vec3 kD = 1.0 - kS;
-    kD *= 1.0 - metallic;	  
+    kD *= 1.0 - metallic;
+
     vec3 irradiance = texture(irradianceMap, vec3(N.x, -N.y, N.z)).rgb;
     vec3 diffuse = irradiance * albedo;
-    vec3 ambient = (kD * diffuse) * ao;
-	//vec3 ambient = vec3(0.03) * albedo * ao;
-	vec3 color = ambient + lo;
 
-	//color = acesTonemap(color);
-	//color = color / (color + vec3(1.0));
-	//color = pow(color, vec3(1.0 / 2.2));
+	const float MAX_REFLECTION_LOD = 4.0;
+    vec3 prefilteredColor = textureLod(prefilterMap, vec3(R.x, -R.y, R.z),  roughness * MAX_REFLECTION_LOD).rgb;
+    vec2 brdf  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness) * vec2(1.0, -1.0)).rg;
+    vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
+
+    vec3 ambient = (kD * diffuse + specular) * ao;
+
+	vec3 color = ambient + lo;
 
 	fragColor = vec4(color, 1.0);
 }

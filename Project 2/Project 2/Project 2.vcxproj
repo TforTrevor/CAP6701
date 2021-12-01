@@ -200,6 +200,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\aces.frag" />
+    <None Include="shaders\brdf.frag" />
     <None Include="shaders\copy.frag" />
     <None Include="shaders\default.vert" />
     <None Include="shaders\default_tess.vert" />
@@ -210,6 +211,7 @@
     <None Include="shaders\pbr.frag" />
     <None Include="shaders\phong.frag" />
     <None Include="shaders\post_processing.vert" />
+    <None Include="shaders\prefilter.frag" />
     <None Include="shaders\quad_tess.tesc" />
     <None Include="shaders\quad_tess.tese" />
     <None Include="shaders\skybox.frag" />
