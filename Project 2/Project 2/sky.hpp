@@ -27,7 +27,21 @@ private:
 	void captureIrradiance(const glm::mat4& projection, const glm::mat4 view[], int width, int height);
 	void capturePrefilter(const glm::mat4& projection, const glm::mat4 view[], int width, int height);
 	void captureBRDF(int width, int height);
+	GLuint captureLUT(Shader& lutShader, int width, int height, int stepCount);
+	GLuint captureLUT(Shader& lutShader, int width, int height, int depth, int stepCount);
 	
 	void createQuad();
 	GLuint quadVAO;
+
+	//PBR sky
+	GLuint transmittanceLUT;
+	GLuint skyViewLUT;
+	GLuint aerialPerspectiveLUT;
+	GLuint multiScatteringLUT;
+	GLuint pbrSkyMap;
+
+	void captureTransmittance(int width, int height, int stepCount);
+	void captureMultiScatter(int width, int height, int stepCount);
+
+	glm::vec3 sunDirection = glm::vec3(-3.0f, -4.0f, -4.0f);
 };

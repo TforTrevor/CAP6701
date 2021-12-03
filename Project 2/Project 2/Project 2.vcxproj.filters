@@ -16,6 +16,9 @@
     <Filter Include="Source Files\shaders">
       <UniqueIdentifier>{fbe08b6c-417f-4511-ad31-bfc6200a5ae9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\shaders\sky">
+      <UniqueIdentifier>{d24055a2-50ed-465f-b69d-623509f01f0b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -159,6 +162,24 @@
     </None>
     <None Include="shaders\brdf.frag">
       <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\sky\aerial_perspective.frag">
+      <Filter>Source Files\shaders\sky</Filter>
+    </None>
+    <None Include="shaders\sky\final.frag">
+      <Filter>Source Files\shaders\sky</Filter>
+    </None>
+    <None Include="shaders\sky\multi_scattering.frag">
+      <Filter>Source Files\shaders\sky</Filter>
+    </None>
+    <None Include="shaders\sky\sky_view.frag">
+      <Filter>Source Files\shaders\sky</Filter>
+    </None>
+    <None Include="shaders\sky\transmittance.frag">
+      <Filter>Source Files\shaders\sky</Filter>
+    </None>
+    <None Include="shaders\sky\common.glsl">
+      <Filter>Source Files\shaders\sky</Filter>
     </None>
   </ItemGroup>
 </Project>

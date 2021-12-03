@@ -4,6 +4,8 @@
 #include <fstream>
 #include <sstream>
 
+#include "Shadinclude.hpp"
+
 Shader::Shader(std::string vsPath, std::string fsPath) 
 {
 	shaderProgramID = loadShaders(vsPath.c_str(), fsPath.c_str());
@@ -73,15 +75,15 @@ GLuint Shader::loadShader(const char* path, GLenum shaderType)
 
 	GLuint shaderID = glCreateShader(shaderType);
 
-	std::string code;
-	std::ifstream vsStream(path, std::ios::in);
-	if (vsStream.is_open())
-	{
-		std::stringstream sstr;
-		sstr << vsStream.rdbuf();
-		code = sstr.str();
-		vsStream.close();
-	}
+	std::string code = Shadinclude::load(path);
+	//std::ifstream vsStream(path, std::ios::in);
+	//if (vsStream.is_open())
+	//{
+	//	std::stringstream sstr;
+	//	sstr << vsStream.rdbuf();
+	//	code = sstr.str();
+	//	vsStream.close();
+	//}
 
 	std::cout << "Compiling shader: " << path << std::endl;
 	char const* pointer = code.c_str();

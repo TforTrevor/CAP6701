@@ -26,6 +26,18 @@ Sky::Sky(std::string hdriPath) : hdriPath{ hdriPath }
 	std::shared_ptr<Texture> skyboxTexture = std::make_shared<Texture>(hdriMap, true);
 	std::shared_ptr<Material> skyboxMaterial = std::make_shared<Material>(skyboxTexture, skyboxShader);
 	skyboxObject = std::make_unique<RenderObject>(cubeModel, skyboxMaterial);
+
+	
+	Shader skyViewShader{ "shaders/post_processing.vert", "shaders/sky/sky_view.frag" };
+	Shader aerialPerspectiveShader{ "shaders/post_processing.vert", "shaders/sky/aerial_perspective.frag" };
+	
+	Shader finalShader{ "shaders/post_processing.vert", "shaders/sky/final.frag" };
+
+	captureTransmittance(256, 64, 40);
+	//skyViewLUT = captureLUT(skyViewShader, 200, 100, 30);
+	//aerialPerspectiveLUT = captureLUT(aerialPerspectiveShader, 32, 32, 32, 30);
+	captureMultiScatter(32, 32, 20);
+	//pbrSkyMap = 
 }
 
 void Sky::draw(std::shared_ptr<Camera> camera)
@@ -216,4 +228,66 @@ void Sky::createQuad()
 	//UV
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+}
+
+void Sky::captureTransmittance(int width, int height, int stepCount)
+{
+	glGenTextures(1, &transmittanceLUT);
+	glBindTexture(GL_TEXTURE_2D, transmittanceLUT);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	Shader transmittanceShader{ "shaders/post_processing.vert", "shaders/sky/transmittance.frag" };
+
+	glViewport(0, 0, width, height);
+	transmittanceShader.bind();
+	transmittanceShader.setUniform3f("sunDirection", glm::normalize(sunDirection));
+	transmittanceShader.setUniform1i("stepCount", stepCount);
+	transmittanceShader.setUniform2f("lutRes", glm::vec2(width, height));
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, transmittanceLUT, 0);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glBindVertexArray(quadVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+
+	transmittanceShader.unbind();
+}
+
+void Sky::captureMultiScatter(int width, int height, int stepCount)
+{
+	glGenTextures(1, &multiScatteringLUT);
+	glBindTexture(GL_TEXTURE_2D, multiScatteringLUT);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	Shader multiScatteringShader{ "shaders/post_processing.vert", "shaders/sky/multi_scattering.frag" };
+
+	glViewport(0, 0, width, height);
+	multiScatteringShader.bind();
+	multiScatteringShader.setUniform3f("sunDirection", glm::normalize(sunDirection));
+	multiScatteringShader.setUniform1i("stepCount", stepCount);
+	multiScatteringShader.setUniform2f("lutRes", glm::vec2(width, height));
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, transmittanceLUT);
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, multiScatteringLUT, 0);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glBindVertexArray(quadVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+
+	multiScatteringShader.unbind();
 }
