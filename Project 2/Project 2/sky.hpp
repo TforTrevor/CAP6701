@@ -44,8 +44,8 @@ private:
 
 	void captureTransmittance(int width, int height, int stepCount);
 	void captureMultiScatter(int width, int height, int stepCount);
-	void captureSkyView(int width, int height, int stepCount, float time);
-	void captureSkyPBR(int width, int height, float time);
+	void captureSkyView(int width, int height, int stepCount, std::shared_ptr<Camera> camera, float time);
+	void captureSkyPBR(int width, int height, std::shared_ptr<Camera> camera, float time);
 
 	Shader transmittanceShader{ "shaders/post_processing.vert", "shaders/sky/transmittance.frag" };
 	Shader multiScatteringShader{ "shaders/post_processing.vert", "shaders/sky/multi_scattering.frag" };
@@ -76,4 +76,6 @@ private:
 
 	std::shared_ptr<Model> cubeModel = std::make_shared<Model>("models/cube.obj", false);
 	RenderObject cubeObject{ cubeModel };
+
+	float currentTime = -1.0f;
 };

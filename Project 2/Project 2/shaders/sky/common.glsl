@@ -1,5 +1,6 @@
 uniform vec2 lutRes;
 uniform vec3 sunDirection;
+uniform vec3 viewPos;
 
 const float PI = 3.14159265358;
 

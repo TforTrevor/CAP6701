@@ -200,7 +200,7 @@ int main()
         }
 
         renderer.begin(hdrFBO.frameBufferObject);
-        sky->drawPBR(camera, currentFrame);
+        sky->drawPBR(camera, 8.0f);
         renderer.toggleTessellation(true);
         renderer.setPatchSize(3);
         renderer.drawObjects(pbrObjects, currentFrame);

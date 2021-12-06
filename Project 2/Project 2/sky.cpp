@@ -30,10 +30,11 @@ Sky::Sky(std::string hdriPath) : hdriPath{ hdriPath }
 	
 	Shader aerialPerspectiveShader{ "shaders/post_processing.vert", "shaders/sky/aerial_perspective.frag" };
 
-	captureTransmittance(256 * 2, 64 * 2, 40);
+	captureTransmittance(256, 64, 40);
+	captureMultiScatter(32, 32, 20);
 	//skyViewLUT = captureLUT(skyViewShader, 200, 100, 30);
 	//aerialPerspectiveLUT = captureLUT(aerialPerspectiveShader, 32, 32, 32, 30);
-	captureMultiScatter(32, 32, 20);
+	
 	//pbrSkyMap = 
 }
 
@@ -290,7 +291,7 @@ void Sky::captureMultiScatter(int width, int height, int stepCount)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Sky::captureSkyView(int width, int height, int stepCount, float time)
+void Sky::captureSkyView(int width, int height, int stepCount, std::shared_ptr<Camera> camera, float time)
 {
 	if (width != skyViewLUTSize.x || height != skyViewLUTSize.y)
 	{
@@ -310,7 +311,7 @@ void Sky::captureSkyView(int width, int height, int stepCount, float time)
 	skyViewShader.bind();
 	skyViewShader.setUniform1i("stepCount", stepCount);
 	skyViewShader.setUniform2f("lutRes", glm::vec2(width, height));
-	skyViewShader.setUniform3f("viewPos", glm::vec3(0, 6.360 + 0.0002, 0));
+	skyViewShader.setUniform3f("viewPos", glm::vec3(0, 6.360 + camera->getPosition().y / 1000000.0f, 0));
 	skyViewShader.setUniform3f("sunDirection", glm::normalize(sunDirection));
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, transmittanceLUT);
@@ -333,23 +334,30 @@ void Sky::captureSkyView(int width, int height, int stepCount, float time)
 
 void Sky::drawPBR(std::shared_ptr<Camera> camera, float time)
 {
-	sunDirection = glm::vec3(-cos(time / 60.0f), -sin(time / 60.0f), 0.0f);
+	sunDirection = glm::vec3(-cos(time / 30.0f), -sin(time / 30.0f), 0.0f);
 
 	GLint currentFBO;
 	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &currentFBO);
 
-	captureSkyView(200, 100, 30, time);
+	//captureTransmittance(256, 64, 40);
+	//captureMultiScatter(32, 32, 20);
+	captureSkyView(200, 200, 30, camera, time);
 
-	captureSkyPBR(512, 512, time);
-	captureIrradiance(pbrSkyMap, 32, 32);
-	capturePrefilter(pbrSkyMap, 128, 128);
+	if (currentTime != time)
+	{
+		captureSkyPBR(512, 512, camera, time);
+		captureIrradiance(pbrSkyMap, 32, 32);
+		capturePrefilter(pbrSkyMap, 128, 128);
+
+		currentTime = time;
+	}	
 
 	glBindFramebuffer(GL_FRAMEBUFFER, currentFBO);
 
 	glDepthFunc(GL_LEQUAL);
 	glViewport(0, 0, camera->CAMERA_WIDTH, camera->CAMERA_HEIGHT);
 	finalShader.bind();
-	finalShader.setUniform3f("viewPos", glm::vec3(0, 6.360 + 0.0002, 0));
+	finalShader.setUniform3f("viewPos", glm::vec3(0, 6.360 + camera->getPosition().y / 1000000.0f, 0));
 	finalShader.setUniform3f("sunDirection", glm::normalize(sunDirection));
 	finalShader.setUniformMat4("inverseMatrix", glm::inverse(camera->getProjectionMatrix() * camera->getViewMatrix()));
 	finalShader.setUniform1i("showSun", true);
@@ -366,7 +374,7 @@ void Sky::drawPBR(std::shared_ptr<Camera> camera, float time)
 	finalShader.unbind();
 }
 
-void Sky::captureSkyPBR(int width, int height, float time)
+void Sky::captureSkyPBR(int width, int height, std::shared_ptr<Camera> camera, float time)
 {
 	if (width != pbrSkyMapSize.x || height != pbrSkyMapSize.y)
 	{
@@ -375,7 +383,7 @@ void Sky::captureSkyPBR(int width, int height, float time)
 	}
 
 	finalShader.bind();
-	finalShader.setUniform3f("viewPos", glm::vec3(0, 6.360 + 0.0002, 0));
+	finalShader.setUniform3f("viewPos", glm::vec3(0, 6.360 + camera->getPosition().y / 1000000.0f, 0));
 	finalShader.setUniform3f("sunDirection", glm::normalize(sunDirection));
 	finalShader.setUniformMat4("projectionMatrix", captureProjection);
 	finalShader.setUniform1i("showSun", false);

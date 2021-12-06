@@ -29,7 +29,7 @@ void Camera::processInput(GLFWwindow* window, float deltaTime)
 
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
 	{
-		speed = 5.0f * 5.0f * deltaTime;
+		speed = 5.0f * 10.0f * deltaTime;
 	}
 	else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
 	{

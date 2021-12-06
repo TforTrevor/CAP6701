@@ -8,7 +8,6 @@ in vec4 far4;
 
 out vec4 fragColor;
 
-uniform vec3 viewPos;
 uniform bool showSun;
 
 uniform sampler2D transmittanceSampler;
@@ -93,7 +92,7 @@ void main()
         lum += sunLum;
     }    
 
-    lum *= 5;
+    lum *= 10;
     
     fragColor = vec4(lum,1.0);
 }
