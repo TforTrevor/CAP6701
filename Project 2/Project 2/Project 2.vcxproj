@@ -195,6 +195,7 @@
     <ClInclude Include="render_object.hpp" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="assets.hpp" />
+    <ClInclude Include="Shadinclude.hpp" />
     <ClInclude Include="sky.hpp" />
     <ClInclude Include="texture.hpp" />
   </ItemGroup>
@@ -221,6 +222,7 @@
     <None Include="shaders\sky\common.glsl" />
     <None Include="shaders\sky\final.frag" />
     <None Include="shaders\sky\multi_scattering.frag" />
+    <None Include="shaders\sky\sky_plane.vert" />
     <None Include="shaders\sky\sky_view.frag" />
     <None Include="shaders\sky\transmittance.frag" />
     <None Include="shaders\tri_tess.tesc" />

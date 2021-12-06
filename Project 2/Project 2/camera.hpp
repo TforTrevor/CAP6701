@@ -8,6 +8,9 @@ class Camera
 public:
 	Camera(const unsigned int width, const unsigned int height);
 
+	const unsigned int CAMERA_WIDTH;
+	const unsigned int CAMERA_HEIGHT;
+
 	void processInput(GLFWwindow* window, float deltaTime);
 	void processMouse(double x, double y);
 	glm::mat4 getViewMatrix();

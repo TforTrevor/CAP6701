@@ -1,6 +1,6 @@
 #version 460
 
-#include common.glsl
+#include "common.glsl"
 
 in vec2 vsUV;
 
@@ -54,7 +54,7 @@ void getMulScattValues(vec3 pos, vec3 sunDir, out vec3 lumTotal, out vec3 fms)
             float t = 0.0;
             for (int stepI = 0; stepI < stepCount; stepI++) 
             {
-                float newT = ((stepI + 0.3) / stepCount)*tMax;
+                float newT = ((stepI + 0.3) / stepCount) * tMax;
                 float dt = newT - t;
                 t = newT;
 
@@ -64,40 +64,40 @@ void getMulScattValues(vec3 pos, vec3 sunDir, out vec3 lumTotal, out vec3 fms)
                 float mieScattering;
                 getScatteringValues(newPos, rayleighScattering, mieScattering, extinction);
 
-                vec3 sampleTransmittance = exp(-dt*extinction);
+                vec3 sampleTransmittance = exp(-dt * extinction);
                 
                 // Integrate within each segment.
                 vec3 scatteringNoPhase = rayleighScattering + mieScattering;
                 vec3 scatteringF = (scatteringNoPhase - scatteringNoPhase * sampleTransmittance) / extinction;
-                lumFactor += transmittance*scatteringF;
+                lumFactor += transmittance * scatteringF;
                 
                 // This is slightly different from the paper, but I think the paper has a mistake?
                 // In equation (6), I think S(x,w_s) should be S(x-tv,w_s).
                 vec3 sunTransmittance = getValFromTLUT(transmittanceSampler, textureSize(transmittanceSampler, 0), newPos, sunDir);
 
-                vec3 rayleighInScattering = rayleighScattering*rayleighPhaseValue;
-                float mieInScattering = mieScattering*miePhaseValue;
-                vec3 inScattering = (rayleighInScattering + mieInScattering)*sunTransmittance;
+                vec3 rayleighInScattering = rayleighScattering * rayleighPhaseValue;
+                float mieInScattering = mieScattering * miePhaseValue;
+                vec3 inScattering = (rayleighInScattering + mieInScattering) * sunTransmittance;
 
                 // Integrated scattering within path segment.
                 vec3 scatteringIntegral = (inScattering - inScattering * sampleTransmittance) / extinction;
 
-                lum += scatteringIntegral*transmittance;
+                lum += scatteringIntegral * transmittance;
                 transmittance *= sampleTransmittance;
             }
             
             if (groundDist > 0.0) 
             {
-                vec3 hitPos = pos + groundDist*rayDir;
+                vec3 hitPos = pos + groundDist * rayDir;
                 if (dot(pos, sunDir) > 0.0) 
                 {
                     hitPos = normalize(hitPos) * groundRadius;
-                    lum += transmittance*groundAlbedo*getValFromTLUT(transmittanceSampler, textureSize(transmittanceSampler, 0), hitPos, sunDir);
+                    lum += transmittance * groundAlbedo * getValFromTLUT(transmittanceSampler, textureSize(transmittanceSampler, 0), hitPos, sunDir);
                 }
             }
             
-            fms += lumFactor*invSamples;
-            lumTotal += lum*invSamples;
+            fms += lumFactor * invSamples;
+            lumTotal += lum * invSamples;
         }
     }
 }
@@ -118,6 +118,6 @@ void main()
     getMulScattValues(pos, sunDir, lum, f_ms);
     
     // Equation 10 from the paper.
-    vec3 psi = lum  / (1.0 - f_ms); 
+    vec3 psi = lum / (1.0 - f_ms); 
     fragColor = vec4(psi, 1.0);
 }

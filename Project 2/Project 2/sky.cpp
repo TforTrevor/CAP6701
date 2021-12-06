@@ -16,9 +16,9 @@ Sky::Sky(std::string hdriPath) : hdriPath{ hdriPath }
 	glGenFramebuffers(1, &captureFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 
-	captureSky(captureProjection, captureViews, 512, 512);
-	captureIrradiance(captureProjection, captureViews, 32, 32);
-	capturePrefilter(captureProjection, captureViews, 128, 128);
+	//captureSky(captureProjection, captureViews, 512, 512);
+	//captureIrradiance(captureProjection, captureViews, 32, 32);
+	//capturePrefilter(captureProjection, captureViews, 128, 128);
 	captureBRDF(512, 512);
 
 	std::shared_ptr<Model> cubeModel = std::make_shared<Model>("models/cube.obj", false);
@@ -28,12 +28,9 @@ Sky::Sky(std::string hdriPath) : hdriPath{ hdriPath }
 	skyboxObject = std::make_unique<RenderObject>(cubeModel, skyboxMaterial);
 
 	
-	Shader skyViewShader{ "shaders/post_processing.vert", "shaders/sky/sky_view.frag" };
 	Shader aerialPerspectiveShader{ "shaders/post_processing.vert", "shaders/sky/aerial_perspective.frag" };
-	
-	Shader finalShader{ "shaders/post_processing.vert", "shaders/sky/final.frag" };
 
-	captureTransmittance(256, 64, 40);
+	captureTransmittance(256 * 2, 64 * 2, 40);
 	//skyViewLUT = captureLUT(skyViewShader, 200, 100, 30);
 	//aerialPerspectiveLUT = captureLUT(aerialPerspectiveShader, 32, 32, 32, 30);
 	captureMultiScatter(32, 32, 20);
@@ -105,49 +102,52 @@ void Sky::captureSky(const glm::mat4& projection, const glm::mat4 view[], int wi
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
-void Sky::captureIrradiance(const glm::mat4& projection, const glm::mat4 view[], int width, int height)
+void Sky::captureIrradiance(GLuint environmentMap, int width, int height)
 {
-	irradianceMap = createCubemap(width, height, false);
+	if (width != irradianceSize.x || height != irradianceSize.y)
+	{
+		irradianceMap = createCubemap(width, height, false);
+		irradianceSize = glm::vec2(width, height);
+	}
 
-	std::shared_ptr<Shader> irradianceShader = std::make_shared<Shader>("shaders/cubemap.vert", "shaders/irradiance_convolution.frag");
-	std::shared_ptr<Texture> irradianceTexture = std::make_shared<Texture>(hdriMap, true);
-	std::shared_ptr<Material> irradianceMaterial = std::make_shared<Material>(irradianceTexture, irradianceShader);
-	std::shared_ptr<Model> cubeModel = std::make_shared<Model>("models/cube.obj", false);
-	RenderObject renderObject{ cubeModel, irradianceMaterial };
-
-	irradianceMaterial->bind();
-	irradianceShader->setUniformMat4("projectionMatrix", projection);
+	irradianceShader.bind();
+	irradianceShader.setUniformMat4("projectionMatrix", captureProjection);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, environmentMap);
+	irradianceShader.setUniform1i("environmentMap", 0);
 
 	glViewport(0, 0, width, height);
 	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 	for (int i = 0; i < 6; i++)
 	{
-		irradianceShader->setUniformMat4("viewMatrix", view[i]);
+		irradianceShader.setUniformMat4("viewMatrix", captureViews[i]);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradianceMap, 0);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		renderObject.draw(GL_TRIANGLES);
+		cubeObject.draw(GL_TRIANGLES);
 	}
 
-	irradianceMaterial->unbind();
+	irradianceShader.unbind();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Sky::capturePrefilter(const glm::mat4& projection, const glm::mat4 view[], int width, int height)
+void Sky::capturePrefilter(GLuint environmentMap, int width, int height)
 {
-	prefilterMap = createCubemap(width, height, true);
+	if (width != prefilterSize.x || height != prefilterSize.y)
+	{
+		prefilterMap = createCubemap(width, height, true);
+		prefilterSize = glm::vec2(width, height);
+	}
+	
 	glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterMap);
 	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-
-	std::shared_ptr<Shader> prefilterShader = std::make_shared<Shader>("shaders/cubemap.vert", "shaders/irradiance_convolution.frag");
-	std::shared_ptr<Texture> prefilterTexture = std::make_shared<Texture>(hdriMap, true);
-	std::shared_ptr<Material> prefilterMaterial = std::make_shared<Material>(prefilterTexture, prefilterShader);
-	std::shared_ptr<Model> cubeModel = std::make_shared<Model>("models/cube.obj", false);
-	RenderObject renderObject{ cubeModel, prefilterMaterial };
-
-	prefilterMaterial->bind();
-	prefilterShader->setUniformMat4("projectionMatrix", projection);
+	
+	prefilterShader.bind();
+	prefilterShader.setUniformMat4("projectionMatrix", captureProjection);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, environmentMap);
+	prefilterShader.setUniform1i("environmentMap", 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 
@@ -159,19 +159,19 @@ void Sky::capturePrefilter(const glm::mat4& projection, const glm::mat4 view[], 
 		glViewport(0, 0, mipWidth, mipHeight);
 
 		float roughness = (float)mip / (float)(maxMipLevels - 1);
-		prefilterShader->setUniform1f("roughness", roughness);
+		prefilterShader.setUniform1f("roughness", roughness);
 
 		for (int i = 0; i < 6; i++)
 		{
-			prefilterShader->setUniformMat4("viewMatrix", view[i]);
+			prefilterShader.setUniformMat4("viewMatrix", captureViews[i]);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilterMap, mip);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			renderObject.draw(GL_TRIANGLES);
+			cubeObject.draw(GL_TRIANGLES);
 		}
 	}
 
-	prefilterMaterial->unbind();
+	prefilterShader.unbind();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -241,8 +241,6 @@ void Sky::captureTransmittance(int width, int height, int stepCount)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	Shader transmittanceShader{ "shaders/post_processing.vert", "shaders/sky/transmittance.frag" };
-
 	glViewport(0, 0, width, height);
 	transmittanceShader.bind();
 	transmittanceShader.setUniform3f("sunDirection", glm::normalize(sunDirection));
@@ -258,6 +256,7 @@ void Sky::captureTransmittance(int width, int height, int stepCount)
 	glBindVertexArray(0);
 
 	transmittanceShader.unbind();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Sky::captureMultiScatter(int width, int height, int stepCount)
@@ -270,8 +269,6 @@ void Sky::captureMultiScatter(int width, int height, int stepCount)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glBindTexture(GL_TEXTURE_2D, 0);
-
-	Shader multiScatteringShader{ "shaders/post_processing.vert", "shaders/sky/multi_scattering.frag" };
 
 	glViewport(0, 0, width, height);
 	multiScatteringShader.bind();
@@ -290,4 +287,120 @@ void Sky::captureMultiScatter(int width, int height, int stepCount)
 	glBindVertexArray(0);
 
 	multiScatteringShader.unbind();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Sky::captureSkyView(int width, int height, int stepCount, float time)
+{
+	if (width != skyViewLUTSize.x || height != skyViewLUTSize.y)
+	{
+		glGenTextures(1, &skyViewLUT);
+		glBindTexture(GL_TEXTURE_2D, skyViewLUT);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, 0);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		skyViewLUTSize = glm::vec2(width, height);
+	}
+
+	glViewport(0, 0, width, height);
+	skyViewShader.bind();
+	//skyViewShader.setUniform3f("sunDirection", glm::normalize(sunDirection));
+	skyViewShader.setUniform1i("stepCount", stepCount);
+	skyViewShader.setUniform2f("lutRes", glm::vec2(width, height));
+	skyViewShader.setUniform3f("viewPos", glm::vec3(0, 6.360 + 0.0002, 0));
+	skyViewShader.setUniform1f("time", time);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, transmittanceLUT);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, multiScatteringLUT);
+	skyViewShader.setUniform1i("multiScatterSampler", 1);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, skyViewLUT, 0);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glBindVertexArray(quadVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+
+	skyViewShader.unbind();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Sky::drawPBR(std::shared_ptr<Camera> camera, float time)
+{
+	GLint currentFBO;
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &currentFBO);
+
+	captureSkyView(200, 100, 30, time);
+	captureSkyPBR(512, 512, time);
+	captureIrradiance(pbrSkyMap, 32, 32);
+	capturePrefilter(pbrSkyMap, 128, 128);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, currentFBO);
+
+	glDepthFunc(GL_LEQUAL);
+	glViewport(0, 0, camera->CAMERA_WIDTH, camera->CAMERA_HEIGHT);
+	finalShader.bind();
+	finalShader.setUniform3f("viewPos", glm::vec3(0, 6.360 + 0.0002, 0));
+	finalShader.setUniform1f("time", time);
+	finalShader.setUniformMat4("inverseMatrix", glm::inverse(camera->getProjectionMatrix() * camera->getViewMatrix()));
+	finalShader.setUniform1i("showSun", true);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, transmittanceLUT);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, skyViewLUT);
+	finalShader.setUniform1i("skyViewSampler", 1);
+
+	glBindVertexArray(quadVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+
+	finalShader.unbind();
+}
+
+void Sky::captureSkyPBR(int width, int height, float time)
+{
+	if (width != pbrSkyMapSize.x || height != pbrSkyMapSize.y)
+	{
+		pbrSkyMap = createCubemap(width, height, true);
+		pbrSkyMapSize = glm::vec2(width, height);
+	}
+
+	finalShader.bind();
+	finalShader.setUniform3f("viewPos", glm::vec3(0, 6.360 + 0.0002, 0));
+	finalShader.setUniform1f("time", time);
+	finalShader.setUniformMat4("projectionMatrix", captureProjection);
+	finalShader.setUniform1i("showSun", false);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, transmittanceLUT);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, skyViewLUT);
+	finalShader.setUniform1i("skyViewSampler", 1);
+
+	glViewport(0, 0, width, height);
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+	for (int i = 0; i < 6; i++)
+	{
+		finalShader.setUniformMat4("viewMatrix", captureViews[i]);
+		finalShader.setUniformMat4("inverseMatrix", glm::inverse(captureProjection * captureViews[i]));
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, pbrSkyMap, 0);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		glBindVertexArray(quadVAO);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
+	}
+
+	finalShader.unbind();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, pbrSkyMap);
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }

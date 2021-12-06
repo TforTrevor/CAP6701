@@ -98,6 +98,9 @@
     <ClInclude Include="miniz.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Shadinclude.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\default.vert">
@@ -179,6 +182,9 @@
       <Filter>Source Files\shaders\sky</Filter>
     </None>
     <None Include="shaders\sky\common.glsl">
+      <Filter>Source Files\shaders\sky</Filter>
+    </None>
+    <None Include="shaders\sky\sky_plane.vert">
       <Filter>Source Files\shaders\sky</Filter>
     </None>
   </ItemGroup>

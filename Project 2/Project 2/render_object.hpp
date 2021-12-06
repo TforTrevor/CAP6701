@@ -6,6 +6,7 @@
 class RenderObject
 {
 public:
+	RenderObject(std::shared_ptr<Model> model);
 	RenderObject(std::shared_ptr<Model> model, std::shared_ptr<Material> material);
 
 	void draw(GLenum mode);

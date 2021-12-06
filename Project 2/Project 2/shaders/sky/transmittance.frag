@@ -1,6 +1,6 @@
 #version 460
 
-#include common.glsl
+#include "common.glsl"
 
 in vec2 vsUV;
 

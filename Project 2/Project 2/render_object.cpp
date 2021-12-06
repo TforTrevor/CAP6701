@@ -1,5 +1,10 @@
 #include "render_object.hpp"
 
+RenderObject::RenderObject(std::shared_ptr<Model> model) : model{ model }
+{
+	createVAO();
+}
+
 RenderObject::RenderObject(std::shared_ptr<Model> model, std::shared_ptr<Material> material) : model { model }, material{material}
 {
 	createVAO();
@@ -41,7 +46,11 @@ void RenderObject::draw(GLenum mode)
 {
 	if (enabled)
 	{
-		material->bind();
+		if (material != nullptr)
+		{
+			material->bind();
+		}
+		
 		glBindVertexArray(vertexArrayId);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex) * model->vertices.size(), model->vertices.data());

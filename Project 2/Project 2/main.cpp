@@ -198,8 +198,9 @@ int main()
                     object.setEnabled(true);
             }
         }
-        
+
         renderer.begin(hdrFBO.frameBufferObject);
+        sky->drawPBR(camera, currentFrame);
         renderer.toggleTessellation(true);
         renderer.setPatchSize(3);
         renderer.drawObjects(pbrObjects, currentFrame);
@@ -212,7 +213,8 @@ int main()
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        sky->draw(camera);
+        //sky->draw(camera);
+        
         renderer.end();
 
         postProcessing.begin(hdrFBO);

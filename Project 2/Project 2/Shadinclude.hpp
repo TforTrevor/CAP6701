@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 
 //	===========
 //	Shadinclude
@@ -88,6 +89,7 @@ public:
 			{
 				// Remove the include identifier, this will cause the path to remain
 				lineBuffer.erase(0, includeIndentifier.size());
+				lineBuffer.erase(std::remove(lineBuffer.begin(), lineBuffer.end(), '\"'), lineBuffer.end());
 
 				// The include path is relative to the current shader file path
 				std::string pathOfThisFile;

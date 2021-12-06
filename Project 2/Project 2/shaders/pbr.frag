@@ -35,7 +35,7 @@ void main()
 	vec3 R = reflect(-V, N);
 
 	//vec3 albedo = pow(texture(albedoTex, vec2(teUV.x, -teUV.y)).rgb, vec3(2.2, 2.2, 2.2));
-	vec3 albedo = texture(albedoTex, vec2(teUV.x, -teUV.y)).rgb;
+	vec3 albedo = texture(albedoTex, teUV).rgb;
 
 	vec3 f0 = vec3(0.04);
 	f0 = mix(f0, albedo, metallic);
@@ -67,12 +67,13 @@ void main()
 	vec3 kS = F;
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
-
-    vec3 irradiance = texture(irradianceMap, vec3(N.x, -N.y, N.z)).rgb;
+//
+    vec3 irradiance = texture(irradianceMap, vec3(N.x, N.y, N.z)).rgb;
     vec3 diffuse = irradiance * albedo;
 
 	const float MAX_REFLECTION_LOD = 4.0;
-    vec3 prefilteredColor = textureLod(prefilterMap, vec3(R.x, -R.y, R.z),  roughness * MAX_REFLECTION_LOD).rgb;
+//
+    vec3 prefilteredColor = textureLod(prefilterMap, vec3(R.x, R.y, R.z),  roughness * MAX_REFLECTION_LOD).rgb;
     vec2 brdf  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness) * vec2(1.0, -1.0)).rg;
     vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 

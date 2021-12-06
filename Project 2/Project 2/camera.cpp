@@ -3,7 +3,7 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-Camera::Camera(const unsigned int width, const unsigned int height)
+Camera::Camera(const unsigned int width, const unsigned int height) : CAMERA_WIDTH{width}, CAMERA_HEIGHT{height}
 {
 	position = glm::vec3(0, 0, -1);
 	forward = glm::vec3(0, 0, 1);
