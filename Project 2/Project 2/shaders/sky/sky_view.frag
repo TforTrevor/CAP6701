@@ -6,7 +6,6 @@ in vec2 vsUV;
 
 out vec4 fragColor;
 
-//uniform vec3 sunDirection;
 uniform int stepCount;
 uniform vec3 viewPos;
 
@@ -81,7 +80,7 @@ void main()
     float cosAltitude = cos(altitudeAngle);
     vec3 rayDir = vec3(cosAltitude*sin(azimuthAngle), sin(altitudeAngle), -cosAltitude*cos(azimuthAngle));
 
-    float sunAltitude = (0.5 * PI) - acos(dot(getSunDir(), up));
+    float sunAltitude = (0.5 * PI) - acos(dot(-sunDirection, up));
     vec3 sunDir = vec3(0.0, sin(sunAltitude), -cos(sunAltitude));
     
     float atmoDist = rayIntersectSphere(viewPos, rayDir, atmosphereRadius);

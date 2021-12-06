@@ -13,6 +13,7 @@ public:
 	GLuint getIrradiance() { return irradianceMap; }
 	GLuint getPrefilter() { return prefilterMap; }
 	GLuint getBRDF() { return brdfMap; }
+	glm::vec3 getSunDirection() { return sunDirection; }
 
 private:
 	std::string hdriPath;
@@ -52,6 +53,7 @@ private:
 	Shader finalShader{ "shaders/sky/sky_plane.vert", "shaders/sky/final.frag" };
 
 	glm::vec3 sunDirection = glm::vec3(-3.0f, -4.0f, -4.0f);
+
 	glm::vec2 skyViewLUTSize = glm::vec2(-1, -1);
 	glm::vec2 pbrSkySize = glm::vec2(-1, -1);
 	glm::vec2 irradianceSize = glm::vec2(-1, -1);

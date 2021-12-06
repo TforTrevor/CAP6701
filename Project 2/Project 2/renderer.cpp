@@ -33,8 +33,8 @@ void Renderer::drawObjects(std::vector<RenderObject>& objects, float time)
 			glm::mat4 VP = camera->getProjectionMatrix() * camera->getViewMatrix();
 			shader->setUniformMat4("vpMatrix", VP);
 
-			shader->setUniform3f("lightDir", glm::vec3(-3.0f, -4.0f, -4.0f));
-			shader->setUniform4f("lightColor", glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
+			shader->setUniform3f("lightDir", sky->getSunDirection());
+			shader->setUniform4f("lightColor", glm::vec4(1.0f, 1.0f, 1.0f, 2.5f));
 
 			shader->setUniform3f("viewPos", camera->getPosition());
 

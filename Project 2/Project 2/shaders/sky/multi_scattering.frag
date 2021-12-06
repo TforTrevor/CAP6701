@@ -6,7 +6,6 @@ in vec2 vsUV;
 
 out vec4 fragColor;
 
-uniform vec3 sunDirection;
 uniform int stepCount;
 uniform sampler2D transmittanceSampler;
 

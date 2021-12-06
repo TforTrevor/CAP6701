@@ -308,11 +308,10 @@ void Sky::captureSkyView(int width, int height, int stepCount, float time)
 
 	glViewport(0, 0, width, height);
 	skyViewShader.bind();
-	//skyViewShader.setUniform3f("sunDirection", glm::normalize(sunDirection));
 	skyViewShader.setUniform1i("stepCount", stepCount);
 	skyViewShader.setUniform2f("lutRes", glm::vec2(width, height));
 	skyViewShader.setUniform3f("viewPos", glm::vec3(0, 6.360 + 0.0002, 0));
-	skyViewShader.setUniform1f("time", time);
+	skyViewShader.setUniform3f("sunDirection", glm::normalize(sunDirection));
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, transmittanceLUT);
 	glActiveTexture(GL_TEXTURE1);
@@ -334,10 +333,13 @@ void Sky::captureSkyView(int width, int height, int stepCount, float time)
 
 void Sky::drawPBR(std::shared_ptr<Camera> camera, float time)
 {
+	sunDirection = glm::vec3(-cos(time / 60.0f), -sin(time / 60.0f), 0.0f);
+
 	GLint currentFBO;
 	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &currentFBO);
 
 	captureSkyView(200, 100, 30, time);
+
 	captureSkyPBR(512, 512, time);
 	captureIrradiance(pbrSkyMap, 32, 32);
 	capturePrefilter(pbrSkyMap, 128, 128);
@@ -348,7 +350,7 @@ void Sky::drawPBR(std::shared_ptr<Camera> camera, float time)
 	glViewport(0, 0, camera->CAMERA_WIDTH, camera->CAMERA_HEIGHT);
 	finalShader.bind();
 	finalShader.setUniform3f("viewPos", glm::vec3(0, 6.360 + 0.0002, 0));
-	finalShader.setUniform1f("time", time);
+	finalShader.setUniform3f("sunDirection", glm::normalize(sunDirection));
 	finalShader.setUniformMat4("inverseMatrix", glm::inverse(camera->getProjectionMatrix() * camera->getViewMatrix()));
 	finalShader.setUniform1i("showSun", true);
 	glActiveTexture(GL_TEXTURE0);
@@ -374,7 +376,7 @@ void Sky::captureSkyPBR(int width, int height, float time)
 
 	finalShader.bind();
 	finalShader.setUniform3f("viewPos", glm::vec3(0, 6.360 + 0.0002, 0));
-	finalShader.setUniform1f("time", time);
+	finalShader.setUniform3f("sunDirection", glm::normalize(sunDirection));
 	finalShader.setUniformMat4("projectionMatrix", captureProjection);
 	finalShader.setUniform1i("showSun", false);
 	glActiveTexture(GL_TEXTURE0);

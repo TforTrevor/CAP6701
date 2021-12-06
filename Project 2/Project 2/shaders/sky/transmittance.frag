@@ -6,7 +6,6 @@ in vec2 vsUV;
 
 out vec4 fragColor;
 
-uniform vec3 sunDirection;
 uniform int stepCount;
 
 vec3 getSunTransmittance(vec3 pos, vec3 sunDir)

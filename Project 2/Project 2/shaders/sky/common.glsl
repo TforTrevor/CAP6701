@@ -1,5 +1,5 @@
 uniform vec2 lutRes;
-uniform float time;
+uniform vec3 sunDirection;
 
 const float PI = 3.14159265358;
 
@@ -16,22 +16,22 @@ const float mieAbsorptionBase = 4.400;
 
 const vec3 ozoneAbsorptionBase = vec3(0.650, 1.881, 0.085);
 
-float getSunAltitude()
-{
-    const float periodSec = 120.0;
-    const float halfPeriod = periodSec / 2.0;
-    const float sunriseShift = 0.1;
-    float cyclePoint = (1.0 - abs((mod(time, periodSec) - halfPeriod) / halfPeriod));
-    cyclePoint = (cyclePoint * (1.0 + sunriseShift)) - sunriseShift;
-
-    return (0.5 * PI) * cyclePoint;
-}
-
-vec3 getSunDir()
-{
-    float altitude = getSunAltitude();
-    return normalize(vec3(0.0, sin(altitude), -cos(altitude)));
-}
+//float getSunAltitude()
+//{
+//    const float periodSec = 120.0;
+//    const float halfPeriod = periodSec / 2.0;
+//    const float sunriseShift = 0.1;
+//    float cyclePoint = (1.0 - abs((mod(time, periodSec) - halfPeriod) / halfPeriod));
+//    cyclePoint = (cyclePoint * (1.0 + sunriseShift)) - sunriseShift;
+//
+//    return (0.5 * PI) * cyclePoint;
+//}
+//
+//vec3 getSunDir()
+//{
+//    float altitude = getSunAltitude();
+//    return normalize(vec3(0.0, sin(altitude), -cos(altitude)));
+//}
 
 float getMiePhase(float cosTheta)
 {

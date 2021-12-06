@@ -68,14 +68,14 @@ void main()
     vec3 rayDir = far3 - origin;
     rayDir = normalize(rayDir);
 
-	vec3 sunDir = getSunDir();
+	//vec3 sunDir = getSunDir();
     
-    vec3 lum = getValFromSkyLUT(rayDir, sunDir);
+    vec3 lum = getValFromSkyLUT(rayDir, -sunDirection);
 
     if (showSun)
     {
         // Bloom should be added at the end, but this is subtle and works well.
-        vec3 sunLum = sunWithBloom(rayDir, sunDir);
+        vec3 sunLum = sunWithBloom(rayDir, -sunDirection);
         // Use smoothstep to limit the effect, so it drops off to actual zero.
         sunLum = smoothstep(0.002, 1.0, sunLum);
         if (length(sunLum) > 0.0) 
@@ -87,7 +87,7 @@ void main()
             else 
             {
                 // If the sun value is applied to this pixel, we need to calculate the transmittance to obscure it.
-                sunLum *= getValFromTLUT(transmittanceSampler, textureSize(transmittanceSampler, 0), viewPos, sunDir);
+                sunLum *= getValFromTLUT(transmittanceSampler, textureSize(transmittanceSampler, 0), viewPos, -sunDirection);
             }
         }
         lum += sunLum;

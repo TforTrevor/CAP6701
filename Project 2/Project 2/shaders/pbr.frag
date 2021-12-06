@@ -44,7 +44,7 @@ void main()
 	{
 		vec3 L = normalize(-lightDir);
 		vec3 H = normalize(V + L);
-		vec3 radiance = L * lightColor.rgb * lightColor.a;
+		vec3 radiance = lightColor.rgb * lightColor.a;
 
 		float NDF = distributionGGX(N, H, roughness);
 		float G = geometrySmith(N, V, L, roughness);
