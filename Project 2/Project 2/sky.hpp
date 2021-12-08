@@ -6,10 +6,25 @@
 class Sky
 {
 public:
+	struct AtmosphereProperties
+	{
+		float groundRadius = 6.360f;
+		float atmosphereRadius = 6.460f;
+		glm::vec3 rayleighScatteringBase = glm::vec3(5.802f, 13.558f, 33.100f);
+		float rayleighAbsorptionBase = 0.0f;
+		float mieScatteringBase = 3.996f;
+		float mieAbsorptionBase = 4.400f;
+		glm::vec3 ozoneAbsorptionBase = glm::vec3(0.650f, 1.881f, 0.085f);
+		glm::vec3 groundAlbedo = glm::vec3(0.3f, 0.3f, 0.3f);
+
+		glm::vec2 skyViewSize = glm::vec2(200, 100);
+	};
+
+public:
 	Sky(std::string hdriPath);
 
 	void draw(std::shared_ptr<Camera> camera);
-	void drawPBR(std::shared_ptr<Camera> camera, float time);
+	void drawPBR(AtmosphereProperties& properties, std::shared_ptr<Camera> camera, float time);
 	GLuint getIrradiance() { return irradianceMap; }
 	GLuint getPrefilter() { return prefilterMap; }
 	GLuint getBRDF() { return brdfMap; }
@@ -29,8 +44,6 @@ private:
 	void captureIrradiance(GLuint environmentMap, int width, int height);
 	void capturePrefilter(GLuint environmentMap, int width, int height);
 	void captureBRDF(int width, int height);
-	GLuint captureLUT(Shader& lutShader, int width, int height, int stepCount);
-	GLuint captureLUT(Shader& lutShader, int width, int height, int depth, int stepCount);
 	
 	void createQuad();
 	GLuint quadVAO;
@@ -46,6 +59,7 @@ private:
 	void captureMultiScatter(int width, int height, int stepCount);
 	void captureSkyView(int width, int height, int stepCount, std::shared_ptr<Camera> camera, float time);
 	void captureSkyPBR(int width, int height, std::shared_ptr<Camera> camera, float time);
+	void setAtmosphereProperties(Shader& shader);
 
 	Shader transmittanceShader{ "shaders/post_processing.vert", "shaders/sky/transmittance.frag" };
 	Shader multiScatteringShader{ "shaders/post_processing.vert", "shaders/sky/multi_scattering.frag" };
@@ -54,6 +68,8 @@ private:
 
 	glm::vec3 sunDirection = glm::vec3(-3.0f, -4.0f, -4.0f);
 
+	glm::vec2 transmittanceLUTSize = glm::vec2(-1, -1);
+	glm::vec2 multiScatterLUTSize = glm::vec2(-1, -1);
 	glm::vec2 skyViewLUTSize = glm::vec2(-1, -1);
 	glm::vec2 pbrSkySize = glm::vec2(-1, -1);
 	glm::vec2 irradianceSize = glm::vec2(-1, -1);
@@ -78,4 +94,6 @@ private:
 	RenderObject cubeObject{ cubeModel };
 
 	float currentTime = -1.0f;
+
+	AtmosphereProperties atmosphereProperties{};
 };

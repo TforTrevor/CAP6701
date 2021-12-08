@@ -233,20 +233,28 @@ void Sky::createQuad()
 
 void Sky::captureTransmittance(int width, int height, int stepCount)
 {
-	glGenTextures(1, &transmittanceLUT);
-	glBindTexture(GL_TEXTURE_2D, transmittanceLUT);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	if (width != transmittanceLUTSize.x || height != transmittanceLUTSize.y)
+	{
+		glDeleteTextures(1, &transmittanceLUT);
+
+		glGenTextures(1, &transmittanceLUT);
+		glBindTexture(GL_TEXTURE_2D, transmittanceLUT);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, 0);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		transmittanceLUTSize = glm::vec2(width, height);
+	}	
 
 	glViewport(0, 0, width, height);
 	transmittanceShader.bind();
 	transmittanceShader.setUniform3f("sunDirection", glm::normalize(sunDirection));
 	transmittanceShader.setUniform1i("stepCount", stepCount);
 	transmittanceShader.setUniform2f("lutRes", glm::vec2(width, height));
+	setAtmosphereProperties(transmittanceShader);
 	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, transmittanceLUT, 0);
@@ -262,20 +270,28 @@ void Sky::captureTransmittance(int width, int height, int stepCount)
 
 void Sky::captureMultiScatter(int width, int height, int stepCount)
 {
-	glGenTextures(1, &multiScatteringLUT);
-	glBindTexture(GL_TEXTURE_2D, multiScatteringLUT);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	if (width != multiScatterLUTSize.x || height != multiScatterLUTSize.y)
+	{
+		glDeleteTextures(1, &multiScatteringLUT);
+
+		glGenTextures(1, &multiScatteringLUT);
+		glBindTexture(GL_TEXTURE_2D, multiScatteringLUT);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, 0);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		multiScatterLUTSize = glm::vec2(width, height);
+	}	
 
 	glViewport(0, 0, width, height);
 	multiScatteringShader.bind();
 	multiScatteringShader.setUniform3f("sunDirection", glm::normalize(sunDirection));
 	multiScatteringShader.setUniform1i("stepCount", stepCount);
 	multiScatteringShader.setUniform2f("lutRes", glm::vec2(width, height));
+	setAtmosphereProperties(multiScatteringShader);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, transmittanceLUT);
 	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
@@ -295,6 +311,8 @@ void Sky::captureSkyView(int width, int height, int stepCount, std::shared_ptr<C
 {
 	if (width != skyViewLUTSize.x || height != skyViewLUTSize.y)
 	{
+		glDeleteTextures(1, &skyViewLUT);
+
 		glGenTextures(1, &skyViewLUT);
 		glBindTexture(GL_TEXTURE_2D, skyViewLUT);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, 0);
@@ -313,6 +331,7 @@ void Sky::captureSkyView(int width, int height, int stepCount, std::shared_ptr<C
 	skyViewShader.setUniform2f("lutRes", glm::vec2(width, height));
 	skyViewShader.setUniform3f("viewPos", glm::vec3(0, 6.360 + camera->getPosition().y / 1000000.0f, 0));
 	skyViewShader.setUniform3f("sunDirection", glm::normalize(sunDirection));
+	setAtmosphereProperties(skyViewShader);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, transmittanceLUT);
 	glActiveTexture(GL_TEXTURE1);
@@ -332,16 +351,31 @@ void Sky::captureSkyView(int width, int height, int stepCount, std::shared_ptr<C
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Sky::drawPBR(std::shared_ptr<Camera> camera, float time)
+void Sky::drawPBR(AtmosphereProperties& properties, std::shared_ptr<Camera> camera, float time)
 {
 	sunDirection = glm::vec3(-cos(time / 30.0f), -sin(time / 30.0f), 0.0f);
 
 	GLint currentFBO;
 	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &currentFBO);
 
-	//captureTransmittance(256, 64, 40);
-	//captureMultiScatter(32, 32, 20);
-	captureSkyView(200, 200, 30, camera, time);
+	if (properties.atmosphereRadius != atmosphereProperties.atmosphereRadius || properties.groundRadius != atmosphereProperties.groundRadius ||
+		properties.rayleighScatteringBase != atmosphereProperties.rayleighScatteringBase || properties.rayleighAbsorptionBase != atmosphereProperties.rayleighAbsorptionBase ||
+		properties.mieScatteringBase != atmosphereProperties.mieScatteringBase || properties.mieAbsorptionBase != atmosphereProperties.mieAbsorptionBase ||
+		properties.ozoneAbsorptionBase != atmosphereProperties.ozoneAbsorptionBase || properties.groundAlbedo != atmosphereProperties.groundAlbedo)
+	{
+		captureTransmittance(256, 64, 40);
+		captureMultiScatter(32, 32, 20);
+
+		atmosphereProperties = properties;
+		currentTime = -1.0f;
+	}
+
+	if (properties.skyViewSize != atmosphereProperties.skyViewSize)
+	{
+		atmosphereProperties = properties;
+	}
+	
+	captureSkyView(atmosphereProperties.skyViewSize.x, atmosphereProperties.skyViewSize.y, 30, camera, time);
 
 	if (currentTime != time)
 	{
@@ -361,6 +395,7 @@ void Sky::drawPBR(std::shared_ptr<Camera> camera, float time)
 	finalShader.setUniform3f("sunDirection", glm::normalize(sunDirection));
 	finalShader.setUniformMat4("inverseMatrix", glm::inverse(camera->getProjectionMatrix() * camera->getViewMatrix()));
 	finalShader.setUniform1i("showSun", true);
+	setAtmosphereProperties(finalShader);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, transmittanceLUT);
 	glActiveTexture(GL_TEXTURE1);
@@ -387,6 +422,7 @@ void Sky::captureSkyPBR(int width, int height, std::shared_ptr<Camera> camera, f
 	finalShader.setUniform3f("sunDirection", glm::normalize(sunDirection));
 	finalShader.setUniformMat4("projectionMatrix", captureProjection);
 	finalShader.setUniform1i("showSun", false);
+	setAtmosphereProperties(finalShader);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, transmittanceLUT);
 	glActiveTexture(GL_TEXTURE1);
@@ -413,4 +449,16 @@ void Sky::captureSkyPBR(int width, int height, std::shared_ptr<Camera> camera, f
 	glBindTexture(GL_TEXTURE_CUBE_MAP, pbrSkyMap);
 	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+}
+
+void Sky::setAtmosphereProperties(Shader& shader)
+{
+	shader.setUniform1f("groundRadius", atmosphereProperties.groundRadius);
+	shader.setUniform1f("atmosphereRadius", atmosphereProperties.atmosphereRadius);
+	shader.setUniform3f("rayleighScatteringBase", atmosphereProperties.rayleighScatteringBase);
+	shader.setUniform1f("rayleighAbsorptionBase", atmosphereProperties.rayleighAbsorptionBase);
+	shader.setUniform1f("meiScatteringBase", atmosphereProperties.mieScatteringBase);
+	shader.setUniform1f("mieAbsorptionBase", atmosphereProperties.mieAbsorptionBase);
+	shader.setUniform3f("ozoneAbsorptionBase", atmosphereProperties.ozoneAbsorptionBase);
+	shader.setUniform3f("groundAlbedo", atmosphereProperties.groundAlbedo);
 }

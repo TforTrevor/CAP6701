@@ -1,21 +1,20 @@
 uniform vec2 lutRes;
-uniform vec3 sunDirection;
-uniform vec3 viewPos;
+
+//Atmosphere Properties
+uniform float groundRadius = 6.360;
+uniform float atmosphereRadius = 6.460;
+
+uniform vec3 rayleighScatteringBase = vec3(5.802, 13.558, 33.100);
+uniform float rayleighAbsorptionBase = 0.0;
+
+uniform float meiScatteringBase = 3.996;
+uniform float mieAbsorptionBase = 4.400;
+
+uniform vec3 ozoneAbsorptionBase = vec3(0.650, 1.881, 0.085);
+
+uniform vec3 groundAlbedo = vec3(0.3, 0.3, 0.3);
 
 const float PI = 3.14159265358;
-
-const float groundRadius = 6.360;
-const float atmosphereRadius = 6.460;
-
-const vec3 groundAlbedo = vec3(0.3, 0.3, 0.3);
-
-const vec3 rayleighScatteringBase = vec3(5.802, 13.558, 33.100);
-const float rayleighAbsorptionBase = 0.0;
-
-const float meiScatteringBase = 3.996;
-const float mieAbsorptionBase = 4.400;
-
-const vec3 ozoneAbsorptionBase = vec3(0.650, 1.881, 0.085);
 
 //float getSunAltitude()
 //{

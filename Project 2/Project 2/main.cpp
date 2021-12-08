@@ -1,3 +1,7 @@
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 #include <iostream>
 
 #include <GL/glew.h>
@@ -14,6 +18,7 @@ double mouseY = 0;
 bool wireframeToggle = false;
 bool phongToggle = false;
 bool quadsToggle = false;
+bool cursorToggle = false;
 
 const unsigned int WINDOW_WIDTH = 1280;
 const unsigned int WINDOW_HEIGHT = 720;
@@ -38,6 +43,14 @@ void keyCallback(GLFWwindow* window, int key, int scanCode, int action, int mods
     if (key == GLFW_KEY_3 && action == GLFW_PRESS)
     {
         quadsToggle = !quadsToggle;
+    }
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    {
+        cursorToggle = !cursorToggle;
+        if (cursorToggle)
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        else
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 }
 
@@ -65,7 +78,7 @@ int main()
     if (!glfwInit())
         return -1;
 
-    window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Hello World", nullptr, nullptr);
+    window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "OpenGL Renderer", nullptr, nullptr);
     if (!window)
     {
         glfwTerminate();
@@ -85,6 +98,14 @@ int main()
     std::cout << glGetString(GL_VERSION) << std::endl;
 
     glDebugMessageCallback(errorCallback, nullptr);
+
+    //Init IMGUI
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 460");
 
     std::shared_ptr<ShaderAssets> shaderAssets = std::make_shared<ShaderAssets>();
     std::shared_ptr<TextureAssets> textureAssets = std::make_shared<TextureAssets>();
@@ -136,14 +157,20 @@ int main()
 
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
+    float worldTime = 4.0f;
 
     HDRFBO hdrFBO{ WINDOW_WIDTH, WINDOW_HEIGHT };
+    Sky::AtmosphereProperties atmosphereProperties{};
 
     while (!glfwWindowShouldClose(window))
     {
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
 
         glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -156,8 +183,12 @@ int main()
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
 
-        camera->processInput(window, deltaTime);
-        camera->processMouse(mouseX, mouseY);
+        if (!cursorToggle)
+        {
+            camera->processInput(window, deltaTime);
+            camera->processMouse(mouseX, mouseY);
+        }
+        
         for (ParticleSystem& system : particleSystems)
         {
             system.update(deltaTime);
@@ -200,7 +231,7 @@ int main()
         }
 
         renderer.begin(hdrFBO.frameBufferObject);
-        sky->drawPBR(camera, 8.0f);
+        sky->drawPBR(atmosphereProperties, camera, worldTime);
         renderer.toggleTessellation(true);
         renderer.setPatchSize(3);
         renderer.drawObjects(pbrObjects, currentFrame);
@@ -223,10 +254,35 @@ int main()
         postProcessing.render(shaderAssets->ppLinearToGamma);
         postProcessing.end();
 
+        if (cursorToggle)
+            ImGui::Begin("Atmosphere");
+        else
+            ImGui::Begin("Atmosphere", (bool*)0, ImGuiWindowFlags_::ImGuiWindowFlags_NoInputs);
+        ImGui::DragFloat("Time", &worldTime, 0.1f, 0.0f);
+        ImGui::DragFloat2("Sky View LUT size", (float*)&atmosphereProperties.skyViewSize, 1.0f, 1.0f, 2048.0f);
+        ImGui::Text("Atmosphere Properties");
+        ImGui::DragFloat("Ground Radius", &atmosphereProperties.groundRadius, 0.001f, 0.0f, atmosphereProperties.atmosphereRadius);
+        ImGui::DragFloat("Atmosphere Radius", &atmosphereProperties.atmosphereRadius, 0.001f, atmosphereProperties.groundRadius, 100.0f);
+        ImGui::DragFloat3("Rayleigh Scattering Base", (float*)&atmosphereProperties.rayleighScatteringBase, 0.01f, 0.0f);
+        ImGui::DragFloat("Rayleigh Absorption Base", &atmosphereProperties.rayleighAbsorptionBase, 0.01f, 0.0f);
+        ImGui::DragFloat("Mie Scattering Base", &atmosphereProperties.mieScatteringBase, 0.01f, 0.0f);
+        ImGui::DragFloat("Mie Absorption Base", &atmosphereProperties.mieAbsorptionBase, 0.01f, 0.0f);
+        ImGui::DragFloat3("Ozone Absorption Base", (float*)&atmosphereProperties.ozoneAbsorptionBase, 0.01f, 0.0f);
+        ImGui::DragFloat3("Ground Albedo", (float*)&atmosphereProperties.groundAlbedo, 0.01f, 0.0f);
+        ImGui::SetWindowSize({ 0, 0 }, 0);
+        ImGui::End();
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
         glfwSwapBuffers(window);
 
         glfwPollEvents();
     }
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     glfwTerminate();
 

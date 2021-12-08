@@ -7,6 +7,8 @@ in vec2 vsUV;
 out vec4 fragColor;
 
 uniform int stepCount;
+uniform vec3 viewPos;
+uniform vec3 sunDirection;
 
 uniform sampler2D transmittanceSampler;
 uniform sampler2D multiScatterSampler;

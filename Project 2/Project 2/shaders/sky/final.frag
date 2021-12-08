@@ -9,6 +9,8 @@ in vec4 far4;
 out vec4 fragColor;
 
 uniform bool showSun;
+uniform vec3 viewPos;
+uniform vec3 sunDirection;
 
 uniform sampler2D transmittanceSampler;
 uniform sampler2D skyViewSampler;
