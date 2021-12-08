@@ -19,9 +19,10 @@ bool wireframeToggle = false;
 bool phongToggle = false;
 bool quadsToggle = false;
 bool cursorToggle = false;
+bool drawUI = true;
 
-const unsigned int WINDOW_WIDTH = 1280;
-const unsigned int WINDOW_HEIGHT = 720;
+const unsigned int WINDOW_WIDTH = 1600;
+const unsigned int WINDOW_HEIGHT = 900;
 
 void mouseCallback(GLFWwindow* window, double x, double y)
 {
@@ -51,6 +52,10 @@ void keyCallback(GLFWwindow* window, int key, int scanCode, int action, int mods
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         else
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+    if (key == GLFW_KEY_H && action == GLFW_PRESS)
+    {
+        drawUI = !drawUI;
     }
 }
 
@@ -161,6 +166,7 @@ int main()
 
     HDRFBO hdrFBO{ WINDOW_WIDTH, WINDOW_HEIGHT };
     Sky::AtmosphereProperties atmosphereProperties{};
+    bool drawObjects = true;
 
     while (!glfwWindowShouldClose(window))
     {
@@ -232,15 +238,18 @@ int main()
 
         renderer.begin(hdrFBO.frameBufferObject);
         sky->drawPBR(atmosphereProperties, camera, worldTime);
-        renderer.toggleTessellation(true);
-        renderer.setPatchSize(3);
-        renderer.drawObjects(pbrObjects, currentFrame);
-        renderer.drawObjects(phongObjects, currentFrame);
-        renderer.setPatchSize(4);
-        renderer.drawObjects(pbrQuadObjects, currentFrame);
-        renderer.drawObjects(phongQuadObjects, currentFrame);
-        renderer.toggleTessellation(false);
-        renderer.drawObjects(particleSystems, currentFrame);
+        if (drawObjects)
+        {
+            renderer.toggleTessellation(true);
+            renderer.setPatchSize(3);
+            renderer.drawObjects(pbrObjects, currentFrame);
+            renderer.drawObjects(phongObjects, currentFrame);
+            renderer.setPatchSize(4);
+            renderer.drawObjects(pbrQuadObjects, currentFrame);
+            renderer.drawObjects(phongQuadObjects, currentFrame);
+            renderer.toggleTessellation(false);
+            renderer.drawObjects(particleSystems, currentFrame);
+        }        
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -254,23 +263,27 @@ int main()
         postProcessing.render(shaderAssets->ppLinearToGamma);
         postProcessing.end();
 
-        if (cursorToggle)
-            ImGui::Begin("Atmosphere");
-        else
-            ImGui::Begin("Atmosphere", (bool*)0, ImGuiWindowFlags_::ImGuiWindowFlags_NoInputs);
-        ImGui::DragFloat("Time", &worldTime, 0.1f, 0.0f);
-        ImGui::DragFloat2("Sky View LUT size", (float*)&atmosphereProperties.skyViewSize, 1.0f, 1.0f, 2048.0f);
-        ImGui::Text("Atmosphere Properties");
-        ImGui::DragFloat("Ground Radius", &atmosphereProperties.groundRadius, 0.001f, 0.0f, atmosphereProperties.atmosphereRadius);
-        ImGui::DragFloat("Atmosphere Radius", &atmosphereProperties.atmosphereRadius, 0.001f, atmosphereProperties.groundRadius, 100.0f);
-        ImGui::DragFloat3("Rayleigh Scattering Base", (float*)&atmosphereProperties.rayleighScatteringBase, 0.01f, 0.0f);
-        ImGui::DragFloat("Rayleigh Absorption Base", &atmosphereProperties.rayleighAbsorptionBase, 0.01f, 0.0f);
-        ImGui::DragFloat("Mie Scattering Base", &atmosphereProperties.mieScatteringBase, 0.01f, 0.0f);
-        ImGui::DragFloat("Mie Absorption Base", &atmosphereProperties.mieAbsorptionBase, 0.01f, 0.0f);
-        ImGui::DragFloat3("Ozone Absorption Base", (float*)&atmosphereProperties.ozoneAbsorptionBase, 0.01f, 0.0f);
-        ImGui::DragFloat3("Ground Albedo", (float*)&atmosphereProperties.groundAlbedo, 0.01f, 0.0f);
-        ImGui::SetWindowSize({ 0, 0 }, 0);
-        ImGui::End();
+        if (drawUI)
+        {
+            if (cursorToggle)
+                ImGui::Begin("Atmosphere");
+            else
+                ImGui::Begin("Atmosphere", (bool*)0, ImGuiWindowFlags_::ImGuiWindowFlags_NoInputs);
+            ImGui::DragFloat("Time", &worldTime, 0.1f, 0.0f);
+            ImGui::Checkbox("Draw Objects", &drawObjects);
+            ImGui::DragFloat2("Sky View LUT size", (float*)&atmosphereProperties.skyViewSize, 1.0f, 1.0f, 2048.0f);
+            ImGui::Text("Atmosphere Properties");
+            ImGui::DragFloat("Ground Radius", &atmosphereProperties.groundRadius, 0.001f, 0.0f, atmosphereProperties.atmosphereRadius);
+            ImGui::DragFloat("Atmosphere Radius", &atmosphereProperties.atmosphereRadius, 0.001f, atmosphereProperties.groundRadius, 100.0f);
+            ImGui::DragFloat3("Rayleigh Scattering Base", (float*)&atmosphereProperties.rayleighScatteringBase, 0.01f, 0.0f);
+            ImGui::DragFloat("Rayleigh Absorption Base", &atmosphereProperties.rayleighAbsorptionBase, 0.01f, 0.0f);
+            ImGui::DragFloat("Mie Scattering Base", &atmosphereProperties.mieScatteringBase, 0.01f, 0.0f);
+            ImGui::DragFloat("Mie Absorption Base", &atmosphereProperties.mieAbsorptionBase, 0.01f, 0.0f);
+            ImGui::DragFloat3("Ozone Absorption Base", (float*)&atmosphereProperties.ozoneAbsorptionBase, 0.01f, 0.0f);
+            ImGui::DragFloat3("Ground Albedo", (float*)&atmosphereProperties.groundAlbedo, 0.01f, 0.0f);
+            ImGui::SetWindowSize({ 0, 0 }, 0);
+            ImGui::End();
+        }
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
