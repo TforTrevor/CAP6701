@@ -280,7 +280,7 @@ int main()
             ImGui::DragFloat("Mie Scattering Base", &atmosphereProperties.mieScatteringBase, 0.01f, 0.0f);
             ImGui::DragFloat("Mie Absorption Base", &atmosphereProperties.mieAbsorptionBase, 0.01f, 0.0f);
             ImGui::DragFloat3("Ozone Absorption Base", (float*)&atmosphereProperties.ozoneAbsorptionBase, 0.01f, 0.0f);
-            ImGui::DragFloat3("Ground Albedo", (float*)&atmosphereProperties.groundAlbedo, 0.01f, 0.0f);
+            ImGui::DragFloat3("Ground Albedo", (float*)&atmosphereProperties.groundAlbedo, 0.01f, 0.0f, 1.0f);
             ImGui::SetWindowSize({ 0, 0 }, 0);
             ImGui::End();
         }
